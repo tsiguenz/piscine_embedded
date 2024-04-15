@@ -33,6 +33,6 @@ flash:
 	fi
 
 clean:
-	rm -rf $(HEX) $(BIN_PAT)
+	rm -rf $(HEX) $(BIN_PATH)
 
 .PHONY: all hex flash clean
