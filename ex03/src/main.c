@@ -12,8 +12,9 @@ int main(void) {
     if (!(PIND & (1 << PD2))) {
         // switch the light on PB0
         PORTB ^= (1 << PB0);
+      // wait for state change
       while (!(PIND & (1 << PD2)))
-        ;
+        _delay_ms(50);
     }
     _delay_ms(50);
   }
