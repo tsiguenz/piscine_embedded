@@ -2,14 +2,14 @@
 #include <util/delay.h>
 
 void activate_leds(int number) {
-      if (number & 1)
-        PORTB |= (1 << PB0);
-      if (number & 2)
-        PORTB |= (1 << PB1);
-      if (number & 4)
-        PORTB |= (1 << PB2);
-      if (number & 8)
-        PORTB |= (1 << PB4);
+  if (number & (1 << 0))
+    PORTB |= (1 << PB0);
+  if (number & (1 << 1))
+    PORTB |= (1 << PB1);
+  if (number & (1 << 2))
+    PORTB |= (1 << PB2);
+  if (number & (1 << 3))
+    PORTB |= (1 << PB4);
 }
 
 int main(void) {
@@ -20,21 +20,27 @@ int main(void) {
   DDRD &= ~(1 << PD2 | 1 << PD4);
   // get PD2 value
   while (42) {
-    // check if PD2 is press
     if (!(PIND & (1 << PD2))) {
+      // if PD2 is press
       number++;
+      // avoid overflow
+      number %= 16;
+      // light off all the leds
       PORTB &= ~(1 << PB0 | 1 << PB1 | 1 << PB2 | 1 << PB4);
       activate_leds(number);
+      // avoid bounce
       while (!(PIND & (1 << PD2)))
         _delay_ms(50);
     } else if (!(PIND & (1 << PD4))) {
+      // if PD4 is press
       number--;
+      // light off all the leds
       PORTB &= ~(1 << PB0 | 1 << PB1 | 1 << PB2 | 1 << PB4);
       activate_leds(number);
+      // avoid bounce
       while (!(PIND & (1 << PD4)))
         _delay_ms(50);
     }
-    number %= 16;
     _delay_ms(50);
   }
   return 0;
