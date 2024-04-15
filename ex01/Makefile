@@ -1,5 +1,5 @@
 HEX = main.hex
-F_CPU = 16000000UL
+F_CPU= 16000000UL
 CC = avr-gcc
 BAUD_RATE = 115200
 PORT = /dev/ttyUSB0
