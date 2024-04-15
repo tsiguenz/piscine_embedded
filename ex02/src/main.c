@@ -8,7 +8,7 @@ int main(void) {
   // get PD2 value
   while (42) {
     // check if PD2 is press
-    if (! (PIND & (1 << PD2)) {
+    if (!(PIND & (1 << PD2))) {
       // turn on the light on PB0
       PORTB |= (1 << PB0);
     } else {
