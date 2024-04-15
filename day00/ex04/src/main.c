@@ -23,8 +23,6 @@ int main(void) {
     if (!(PIND & (1 << PD2))) {
       // if PD2 is press
       number++;
-      // avoid overflow
-      number %= 16;
       // light off all the leds
       PORTB &= ~(1 << PB0 | 1 << PB1 | 1 << PB2 | 1 << PB4);
       activate_leds(number);
