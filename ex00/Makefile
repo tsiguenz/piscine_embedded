@@ -1,25 +1,38 @@
-F_CPU=16000000UL
-NAME=main
-CC=avr-gcc
-SRC_PATH = src/
-OBJ_PATH = obj/
+F_CPU= 16000000UL
+CC = avr-gcc
+BAUD_RATE = 115200
+PORT = /dev/ttyUSB0
+FLAGS = -mmcu=atmega328 -DF_CPU=$(F_CPU)
 INC = -Iinc
-SRC=$(addsuffix .c, $(NAME))
-HEX=$(addsuffix .hex, $(NAME))
-BIN=$(addsuffix .bin, $(NAME))
-BAUD_RATE=115200
-PORT=/dev/ttyUSB0
+
+SRC_PATH = src/
+BIN_PATH = bin/
+
+SRC_NAME=main.c
+BIN_NAME=$(SRC_NAME:.c=.bin)
+
+SRC = $(addprefix $(SRC_PATH), $(SRC_NAME))
+BIN = $(addprefix $(BIN_PATH), $(BIN_NAME))
+HEX=$(SRC_NAME:.c=.hex)
 
 all: hex flash
 
-hex:
-	$(CC) $(SRC) -o $(BIN) -mmcu=atmega328 -DF_CPU=$(F_CPU)
+$(HEX): $(BIN)
+	$(eval DO_FLASH := 1)
 	avr-objcopy $(BIN) -O ihex $(HEX)
+	
+$(BIN_PATH)%.bin: $(SRC_PATH)%.c
+	mkdir -p $(@D)
+	$(CC) $< -o $@ -mmcu=atmega328 -DF_CPU=$(F_CPU)
+
+hex: $(HEX)
 
 flash:
-	avrdude -b $(BAUD_RATE) -c arduino -p m328p -P $(PORT) -e -U flash:w:$(HEX)
+	if [ ! -z $(DO_FLASH) ]; then \
+		avrdude -b $(BAUD_RATE) -c arduino -p m328p -P $(PORT) -e -U flash:w:$(HEX); \
+	fi
 
 clean:
-	rm -rf $(HEX) $(BIN)
+	rm -rf $(HEX) $(BIN_PAT)
 
 .PHONY: all hex flash clean
