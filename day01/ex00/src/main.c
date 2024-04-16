@@ -1,5 +1,4 @@
 #include <avr/io.h>
-#include <util/delay.h>
 
 int main(void) {
   // set PB0 as output
