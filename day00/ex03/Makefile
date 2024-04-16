@@ -35,7 +35,6 @@ hex: $(BIN)
 	avr-objcopy $(BIN) -O ihex $(HEX)
 
 flash:
-	echo $(MAKEFILE_CMD)
 	if [ ! -z $(DO_FLASH) ]; then \
 		avrdude $(DUDE_FLAGS); \
 	fi
