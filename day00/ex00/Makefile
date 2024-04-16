@@ -20,19 +20,21 @@ BAUD_RATE = 115200
 PORT = /dev/ttyUSB0
 DUDE_FLAGS = -b $(BAUD_RATE) -c arduino -p m328p -P $(PORT) -e -U flash:w:$(HEX)
 
-all: hex flash
+all: $(HEX) flash
 
 $(BIN): $(OBJ)
 	$(eval DO_FLASH := 1)
 	mkdir -p $(@D)
 	$(CC) $(OBJ) $(CFLAGS) $(INC) -o $(BIN)
 
-$(OBJ_PATH)%.o: $(SRC_PATH)%.c
-	mkdir -p $(@D)
+$(OBJ_PATH)%.o: $(SRC_PATH)%.c | $(OBJ_PATH)
 	$(CC) $(CFLAGS) $(INC) -c $< -o $@ 
 
-hex: $(BIN)
-	avr-objcopy $(BIN) -O ihex $(HEX)
+$(OBJ_PATH):
+	mkdir -p $@
+
+$(HEX): $(BIN)
+	avr-objcopy $(BIN) -O ihex $@
 
 flash:
 	if [ ! -z $(DO_FLASH) ]; then \
