@@ -1,4 +1,4 @@
-#include "uart.h"
+#include "../include/uart.h"
 
 void uart_init(uint16_t ubrr) {
   // enable the transmitter
@@ -10,19 +10,21 @@ void uart_init(uint16_t ubrr) {
 
 void uart_tx(char c) {
   // wait for transmit buffer to be empty
-  while(!(UCSR0A & (1 << UDRE0)));
+  while (!(UCSR0A & (1 << UDRE0)))
+    ;
   // load data into transmit register
   UDR0 = c;
 }
 
 char uart_rx(void) {
   // wait for received buffer to be empty
-  while (!(UCSR0A & (1 << RXC0)));
+  while (!(UCSR0A & (1 << RXC0)))
+    ;
   // return data
   return UDR0;
 }
 
-void uart_printstr(const char* str) {
+void uart_printstr(const char *str) {
   for (int i = 0; str[i]; i++)
     uart_tx(str[i]);
 }
