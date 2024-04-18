@@ -13,6 +13,7 @@ ISR(TIMER0_OVF_vect) {
   else if (duty == 0)
     go_top = 1;
   (go_top)? duty++ : duty--;
+  OCR1A = duty;
 }
 
 int main(void) {
@@ -40,8 +41,6 @@ int main(void) {
   // set prescaler
   TCCR1B |= (1 << CS10);
   sei();
-  while (1) {
-    OCR1A = duty;
-  }
+  while (1) {}
 	return 0;
 }

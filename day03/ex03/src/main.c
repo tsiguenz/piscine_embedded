@@ -5,7 +5,7 @@
 
 
 ISR(USART_RX_vect) {
-  char c = uart_rx();
+  char c = UDR0;
   int switch_case = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
   (switch_case)? uart_tx(c ^ (1 << 5)) : uart_tx(c);
 }
