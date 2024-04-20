@@ -7,7 +7,7 @@
 #define ACK 1
 #define NACK 0
 
-// #define DEBUG
+#define DEBUG
 
 void i2c_init(void);
 void i2c_init_slave(void);

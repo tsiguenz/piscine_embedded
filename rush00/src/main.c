@@ -3,6 +3,8 @@
 
 #define BAUD_RATE 115200
 #define I2C_ADDR 0x42
+#define WAIT_SLAVE 0x43
+#define LOOSE_STATUS 0x43
 
 int is_master = 0;
 
@@ -34,11 +36,42 @@ void init(void) {
   }
 }
 
+void run_game(void) {
+#ifdef DEBUG
+  uart_printstr("run game\r\n");
+#endif
+  // TODO: set timer with random value between 2 and 10
+  int timer = 3;
+  PORTB |= (1 << PB0);
+  _delay_ms(timer * 1000);
+  PORTB &= ~(1 << PB0);
+  while (1) {
+    if (!(PIND & (1 << PD2))) {
+      // if (is_master) {
+      // }
+      uart_printstr("button is pressed");
+      // uart_printstr("I'm the winner");
+#ifdef DEBUG
+      uart_printstr("end game\r\n");
+#endif
+      return;
+    }
+    if (TWDR == LOOSE_STATUS) {
+#ifdef DEBUG
+      uart_printstr("get signal\r\n");
+#endif
+      //       uart_printstr("I'm the looser");
+      //       return;
+    }
+  }
+}
+
 int main(void) {
+  // init led PB0 as output
+  DDRB &= ~(1 << PB0);
   // init button SW1 as input
   DDRD &= ~(1 << PD2);
   uart_init(GET_UBRR(BAUD_RATE), UART_WRITE);
-  // set PD2 as input
   i2c_init();
   init();
   if (is_master) {
@@ -46,5 +79,6 @@ int main(void) {
   } else {
     uart_printstr("I'm slave\r\n");
   }
+  run_game();
   return 0;
 }
