@@ -9,10 +9,8 @@ void i2c_init(void) {
 }
 
 void i2c_init_slave(void) {
-  // set the clock period
-  TWBR = GET_TWBR(SCL_CLOCK);
-  // enable i2c
   TWCR = (1 << TWEN) | (1 << TWEA);
+  TWAR = ((0x42 << 1) | 1);
 }
 
 void i2c_start(uint8_t addr, uint8_t is_read) {
@@ -64,6 +62,17 @@ uint8_t i2c_read(uint8_t ack) {
   while (!(TWCR & (1 << TWINT))) {
 #ifdef DEBUG
     uart_printstr("read\r\n");
+#endif
+  }
+  return TWDR;
+}
+
+uint8_t i2c_read_non_block(uint8_t ack) {
+  // sent receive is ready
+  TWCR = (1 << TWEN) | ((ack) ? (1 << TWEA) : 0);
+  while (!(TWCR & (1 << TWINT))) {
+#ifdef DEBUG
+    uart_printstr("non block read\r\n");
 #endif
   }
   return TWDR;

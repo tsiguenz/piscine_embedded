@@ -15,3 +15,4 @@ void i2c_start(uint8_t addr, uint8_t is_read);
 void i2c_stop(void);
 void i2c_write(unsigned char data);
 uint8_t i2c_read(uint8_t ack);
+uint8_t i2c_read_non_block(uint8_t ack);
