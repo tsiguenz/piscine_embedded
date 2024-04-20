@@ -7,7 +7,10 @@
 #define ACK 1
 #define NACK 0
 
+// #define DEBUG
+
 void i2c_init(void);
+void i2c_init_slave(void);
 void i2c_start(uint8_t addr, uint8_t is_read);
 void i2c_stop(void);
 void i2c_write(unsigned char data);

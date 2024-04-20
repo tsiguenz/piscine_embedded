@@ -1,30 +1,50 @@
-// https://files.seeedstudio.com/wiki/Grove-AHT20_I2C_Industrial_Grade_Temperature_and_Humidity_Sensor/AHT20-datasheet-2020-4-16.pdf
-#include "../include/aht20.h"
 #include "../include/i2c.h"
 #include "../include/uart.h"
-#include <stdlib.h>
 
 #define BAUD_RATE 115200
+#define I2C_ADDR 0x42
+
+int is_master = 0;
+
+// set master and slave
+void init(void) {
+  i2c_init_slave();
+#ifdef DEBUG
+  uart_printstr("init\r\n");
+#endif
+  TWAR = (I2C_ADDR << 1);
+  while (1) {
+    // first to press button is master
+    if (!(PIND & (1 << PD2))) {
+      // send general call
+      i2c_start(0, I2C_WRITE);
+      // send data to everyone
+      i2c_write(1);
+      i2c_stop();
+      i2c_start(I2C_ADDR, I2C_READ);
+      if (TWCR & (1 << TWINT)) {
+        is_master = 1;
+        return;
+      }
+    }
+    // is slave
+    if (TWCR & (1 << TWINT)) {
+      return;
+    }
+  }
+}
 
 int main(void) {
+  // init button SW1 as input
+  DDRD &= ~(1 << PD2);
   uart_init(GET_UBRR(BAUD_RATE), UART_WRITE);
+  // set PD2 as input
   i2c_init();
-  aht20_init();
-  float humidity = 0, temperature = 0;
-  char str[10] = {0};
-  while (1) {
-    _delay_ms(300);
-    aht20_mesure(&humidity, &temperature);
-    uart_printstr("Temperature: ");
-    dtostrf(temperature, 0, 1, str);
-    uart_printstr(str);
-    uart_printstr("°C, ");
-    uart_printstr("Humidity: ");
-    dtostrf(humidity, 0, 0, str);
-    uart_printstr(str);
-    uart_printstr("%");
-    uart_printnl();
+  init();
+  if (is_master) {
+    uart_printstr("I'm master\r\n");
+  } else {
+    uart_printstr("I'm slave\r\n");
   }
-  i2c_stop();
   return 0;
 }
