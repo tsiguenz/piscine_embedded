@@ -16,8 +16,7 @@ void i2c_start(uint8_t addr, uint8_t is_read) {
   }
   // check if start is received
   if (TW_STATUS != TW_START)
-    return ;
-
+    return;
   // set data with address
   TWDR = (addr << 1) | is_read;
   // sent data
@@ -25,8 +24,8 @@ void i2c_start(uint8_t addr, uint8_t is_read) {
   // wait the ack
   while (!(TWCR & (1 << TWINT))) {
   }
-  if (TW_STATUS != TW_MT_SLA_ACK && TW_STATUS != TW_MR_SLA_ACK)  
-    return ;
+  if (TW_STATUS != TW_MT_SLA_ACK && TW_STATUS != TW_MR_SLA_ACK)
+    return;
 }
 
 void i2c_stop(void) {
@@ -45,13 +44,12 @@ void i2c_write(unsigned char data) {
   }
 }
 
-void i2c_read(uint8_t ack) {
+uint8_t i2c_read(uint8_t ack) {
   // sent receive is ready
   TWCR = (1 << TWINT) | (1 << TWEN) | ((ack) ? (1 << TWEA) : 0);
   // wait ack
   while (!(TWCR & (1 << TWINT))) {
   }
+  return TWDR;
   // prepare data
-  uart_printhex(TWDR);
-  uart_printstr(" ");
 }
