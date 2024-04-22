@@ -1,10 +1,11 @@
 #include "../include/eeprom.h"
 #include "../include/uart.h"
+#include <stdlib.h>
 
-void eeprom_write(uint16_t addr, uint8_t data)
-{
+void eeprom_write(uint16_t addr, uint8_t data) {
   /* Wait for completion of previous write */
-  while(EECR & (1 << EEPE)) {}
+  while (EECR & (1 << EEPE)) {
+  }
   /* Set up address and Data Registers */
   EEAR = addr;
   EEDR = data;
@@ -14,10 +15,10 @@ void eeprom_write(uint16_t addr, uint8_t data)
   EECR |= (1 << EEPE);
 }
 
-uint8_t eeprom_read(uint16_t addr)
-{
+uint8_t eeprom_read(uint16_t addr) {
   /* Wait for completion of previous write */
-  while(EECR & (1 << EEPE)) {}
+  while (EECR & (1 << EEPE)) {
+  }
   /* Set up address register */
   EEAR = addr;
   /* Start eeprom read by writing EERE */
@@ -28,30 +29,47 @@ uint8_t eeprom_read(uint16_t addr)
 
 // true if size it's ok
 static bool _check_size(size_t offset, size_t length) {
-  return !((bool)((offset + length + EEPROM_MAGIC_SIZE) >= EEPROM_MAX_SIZE
-                  || !length));
+  return !((bool)((offset + length + EEPROM_MAGIC_SIZE) >= EEPROM_MAX_SIZE ||
+                  !length));
 }
 
-static bool _check_magic(uint16_t *buffer) {
-  return (*buffer == EEPROM_MAGIC);
+// true if magic is ok
+static bool _check_magic(size_t offset) {
+  uint16_t magic = (eeprom_read(offset) << 8) + eeprom_read(offset + 1);
+  return magic == EEPROM_MAGIC;
+}
+
+static void _write_magic(size_t offset) {
+  eeprom_write(offset, EEPROM_MAGIC >> 8);
+  eeprom_write(offset + 1, (uint8_t)EEPROM_MAGIC);
 }
 
 bool safe_eeprom_read(void *buffer, size_t offset, size_t length) {
-  eeprom_read_block(buffer, &offset, length);
-  uart_printhex(*((unsigned char*)buffer));
-  uart_printnl();
-  return _check_magic(buffer);
-  if (_check_size(offset, length) == false)
-    return false;
-  eeprom_read_block(buffer, &offset, length + 2);
-  //if (buffer[)
-  return true;
+  uint8_t *ptr = buffer;
+  if (_check_size(offset, length) == false || _check_magic(offset) == false)
+    return EXIT_FAILURE;
+  for (size_t i = 0; i < length; i++)
+    ptr[i] = eeprom_read(offset + EEPROM_MAGIC_SIZE + i);
+  return EXIT_SUCCESS;
 }
 
-bool safe_eeprom_write(void * buffer, size_t offset, size_t length) {
-  if (offset + length >= EEPROM_MAX_SIZE || length == 0)
-    return false;
-  // eeprom_read_block(, &offset, length);
-  eeprom_write_block(buffer, &offset, length);
-  return true;
+// #define DEBUG
+
+bool safe_eeprom_write(void *buffer, size_t offset, size_t length) {
+  uint8_t tmp = 0;
+  uint8_t *ptr = buffer;
+  if (_check_size(offset, length) == false)
+    return EXIT_FAILURE;
+  if (_check_magic(offset) == false)
+    _write_magic(offset);
+  for (size_t i = 0; i < length; i++) {
+    tmp = eeprom_read(offset + EEPROM_MAGIC_SIZE + i);
+    if (tmp != ptr[i]) {
+#ifdef DEBUG
+      uart_printstr("writing\r\n");
+#endif
+      eeprom_write(offset + EEPROM_MAGIC_SIZE + i, ptr[i]);
+    }
+  }
+  return EXIT_SUCCESS;
 }
