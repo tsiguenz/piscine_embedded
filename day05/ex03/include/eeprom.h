@@ -8,6 +8,8 @@
 #define EEPROM_ID_OFFSET 4
 #define EEPROM_DATA_OFFSET 6
 
+// #define DEBUG
+
 #define GET_CHUNK_SIZE(length) length + EEPROM_DATA_OFFSET
 
 uint8_t eeprom_read(uint16_t addr);

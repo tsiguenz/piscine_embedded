@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 static bool _size_is_ok(uint16_t offset, uint16_t length) {
-  return !((offset + length + EEPROM_MAGIC_SIZE) >= EEPROM_MAX_SIZE || !length);
+  return !((offset + length) >= EEPROM_MAX_SIZE || !length);
 }
 
 static uint16_t _read_uint16(uint16_t offset) {
@@ -61,6 +61,8 @@ static bool _find_id(uint16_t id, uint16_t *offset) {
 
 static bool _id_is_ok(uint16_t id) {
   uint16_t next_magic = 0;
+  if (_magic_is_ok(0) && _get_id(0) == id)
+    return false;
   while (!_find_next_magic(0, &next_magic)) {
     if (_get_id(next_magic) == id)
       return false;
@@ -157,7 +159,8 @@ uint8_t eeprom_read(uint16_t addr) {
 
 bool safe_eeprom_read(void *buffer, uint16_t offset, uint16_t length) {
   uint8_t *ptr = buffer;
-  if (_size_is_ok(offset, length) == false || _magic_is_ok(offset) == false)
+  if (_size_is_ok(offset, length + EEPROM_MAGIC_SIZE) == false ||
+      _magic_is_ok(offset) == false)
     return EXIT_FAILURE;
   for (uint16_t i = 0; i < length; i++)
     ptr[i] = eeprom_read(offset + EEPROM_MAGIC_SIZE + i);
@@ -167,7 +170,7 @@ bool safe_eeprom_read(void *buffer, uint16_t offset, uint16_t length) {
 bool safe_eeprom_write(void *buffer, uint16_t offset, uint16_t length) {
   uint8_t tmp = 0;
   uint8_t *ptr = buffer;
-  if (_size_is_ok(offset, length) == false)
+  if (_size_is_ok(offset, length + EEPROM_MAGIC_SIZE) == false)
     return EXIT_FAILURE;
   if (_magic_is_ok(offset) == false)
     _write_magic(offset);
@@ -182,8 +185,6 @@ bool safe_eeprom_write(void *buffer, uint16_t offset, uint16_t length) {
   }
   return EXIT_SUCCESS;
 }
-
-#define DEBUG
 
 bool eepromalloc_write(uint16_t id, void *buffer, uint16_t length) {
   if (!_id_is_ok(id)) {
@@ -228,7 +229,7 @@ bool eepromalloc_read(uint16_t id, void *buffer, uint16_t length) {
   uint16_t offset;
   if (_find_id(id, &offset))
     return EXIT_FAILURE;
-  if (_size_is_ok(offset, length) == false)
+  if (_size_is_ok(offset + EEPROM_DATA_OFFSET, length) == false)
     return EXIT_FAILURE;
   uint16_t data_offset = _get_data_offset(offset);
   for (uint16_t i = 0; i < length; i++)
@@ -244,12 +245,8 @@ bool eepromalloc_free(uint16_t id) {
   uint8_t tmp = 0;
   for (uint16_t i = 0; i < length; i++) {
     tmp = eeprom_read(offset + i);
-    if (tmp != 0) {
-#ifdef DEBUG
-      uart_printstr("writing\r\n");
-#endif
-      eeprom_write(offset + EEPROM_MAGIC_SIZE + i, 0);
-    }
+    if (tmp != 0)
+      eeprom_write(offset + i, 0);
   }
   return EXIT_SUCCESS;
 }

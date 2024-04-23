@@ -25,20 +25,68 @@ void clear_eeprom(void) {
 
 int main(void) {
   char buffer[42];
+  bool ret;
   uart_init(GET_UBRR(BAUD_RATE), UART_WRITE);
-  // clear_eeprom();
-  uart_printstr("write\r\n");
-  uart_printhex(eepromalloc_write(2, "AAAA", 5));
+  clear_eeprom();
+  ret = eepromalloc_write(2, "AAAA", 5);
+  uart_printstr("write ret: ");
+  uart_printhex(ret);
   uart_printnl();
-  uart_printstr("read\r\n");
-  uart_printhex(eepromalloc_read(2, buffer, 5));
+
+  ret = eepromalloc_write(2, "AAAA", 5);
+  uart_printstr("same write ret: ");
+  uart_printhex(ret);
   uart_printnl();
-  uart_printstr("print buffer\r\n");
+
+  ret = eepromalloc_read(2, buffer, 5);
+  uart_printstr("read ret: ");
+  uart_printhex(ret);
+  uart_printnl();
+
+  uart_printstr("print buffer: ");
   uart_printstr(buffer);
   uart_printnl();
-  uart_printhex(eepromalloc_read(8, buffer, 5));
+
+  ret = eepromalloc_read(42, buffer, 5);
+  uart_printstr("read unknown index ret: ");
+  uart_printhex(ret);
   uart_printnl();
-  uart_printstr("print buffer\r\n");
+
+  ret = eepromalloc_free(2);
+  uart_printstr("free ret: ");
+  uart_printhex(ret);
+  uart_printnl();
+
+  ret = eepromalloc_free(42);
+  uart_printstr("free unknown index ret: ");
+  uart_printhex(ret);
+  uart_printnl();
+
+  ret = eepromalloc_write(2, "BBBB", 5);
+  uart_printstr("write ret: ");
+  uart_printhex(ret);
+  uart_printnl();
+
+  ret = eepromalloc_write(1234, "00000000000000000000", 11);
+  uart_printstr("write ret: ");
+  uart_printhex(ret);
+  uart_printnl();
+
+  ret = eepromalloc_read(1234, buffer, 5);
+  uart_printstr("read ret: ");
+  uart_printhex(ret);
+  uart_printnl();
+
+  uart_printstr("print buffer: ");
+  uart_printstr(buffer);
+  uart_printnl();
+
+  ret = eepromalloc_read(2, buffer, 5);
+  uart_printstr("read ret: ");
+  uart_printhex(ret);
+  uart_printnl();
+
+  uart_printstr("print buffer: ");
   uart_printstr(buffer);
   uart_printnl();
   print_eeprom(0, 32);
