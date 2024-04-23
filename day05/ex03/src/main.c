@@ -19,15 +19,19 @@ void print_eeprom(uint16_t start, uint16_t max) {
 }
 
 void clear_eeprom(void) {
-  for (uint16_t i = 0; i < EEPROM_MAX_SIZE; i++)
-    eeprom_write(i, 0);
+  uint8_t tmp = 0;
+  for (uint16_t i = 0; i < EEPROM_MAX_SIZE; i++) {
+    tmp = eeprom_read(i);
+    if (tmp != 0)
+      eeprom_write(i, 0);
+  }
 }
 
 int main(void) {
   char buffer[42];
   bool ret;
   uart_init(GET_UBRR(BAUD_RATE), UART_WRITE);
-  clear_eeprom();
+  // clear_eeprom();
   ret = eepromalloc_write(2, "AAAA", 5);
   uart_printstr("write ret: ");
   uart_printhex(ret);
@@ -67,17 +71,17 @@ int main(void) {
   uart_printhex(ret);
   uart_printnl();
 
-  ret = eepromalloc_write(1234, "00000000000000000000", 11);
+  ret = eepromalloc_write(1234, "00000000000000000000", 21);
   uart_printstr("write ret: ");
   uart_printhex(ret);
   uart_printnl();
 
-  ret = eepromalloc_read(1234, buffer, 5);
+  ret = eepromalloc_read(1234, buffer, 21);
   uart_printstr("read ret: ");
   uart_printhex(ret);
   uart_printnl();
 
-  uart_printstr("print buffer: ");
+  uart_printstr("pb print buffer: ");
   uart_printstr(buffer);
   uart_printnl();
 
@@ -89,6 +93,6 @@ int main(void) {
   uart_printstr("print buffer: ");
   uart_printstr(buffer);
   uart_printnl();
-  print_eeprom(0, 32);
+  print_eeprom(0, 64);
   return 0;
 }

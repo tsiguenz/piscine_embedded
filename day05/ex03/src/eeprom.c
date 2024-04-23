@@ -63,7 +63,7 @@ static bool _id_is_ok(uint16_t id) {
   uint16_t next_magic = 0;
   if (_magic_is_ok(0) && _get_id(0) == id)
     return false;
-  while (!_find_next_magic(0, &next_magic)) {
+  while (!_find_next_magic(next_magic, &next_magic)) {
     if (_get_id(next_magic) == id)
       return false;
   }
@@ -74,15 +74,15 @@ static bool _write_magic(uint16_t offset) {
   return _write_uint16(offset, EEPROM_MAGIC);
 }
 
-static bool _write_length(uint16_t offset, uint8_t length) {
+static bool _write_length(uint16_t offset, uint16_t length) {
   return _write_uint16(offset + EEPROM_LENGTH_OFFSET, length);
 }
 
-static bool _write_id(uint16_t offset, uint8_t length) {
+static bool _write_id(uint16_t offset, uint16_t length) {
   return _write_uint16(offset + EEPROM_ID_OFFSET, length);
 }
 
-static bool _write_header(uint8_t offset, uint16_t length, uint16_t id) {
+static bool _write_header(uint16_t offset, uint16_t length, uint16_t id) {
   if (!_size_is_ok(offset, GET_CHUNK_SIZE(length)))
     return EXIT_FAILURE;
   _write_magic(offset);
