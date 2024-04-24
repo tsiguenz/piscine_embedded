@@ -1,4 +1,5 @@
 #include "../include/rgb.h"
+#include "../include/uart.h"
 
 void init_rgb(void) {
   // set rgb as output
