@@ -27,3 +27,31 @@ atmega328p [here](https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Au
 - ex00: toggle led state with button interruption
 - ex01: configure Timer0 to trigger a periodic interrupt that varies the
 duty cycle of the LED PB1 controlled by Timer1
+
+## Day03 UART
+
+- ex00: write function to print a char on serial port
+- ex01: write function to print a string on serial port
+- ex02: write function to read and print a char on serial port
+- ex03: same as ex02 but switch case and only use interrupt
+
+## Day04 I2C
+
+- ex00: create functions to initialize i2c communication
+- ex01: print raw data from AHT20 temperature and humidity sensor
+- ex02: print temperature in Celsius and humidity percentage
+
+## Day05 EEPROM
+
+- ex00: use eeprom to save and restore state of a counter increased by SW1
+- ex01: same as above but we now have 4 counter and we can switch with SW2
+- ex02: create functions to safe write in eeprom. Use magic number to recognize
+our datas and don't rewrite the same data multiple times.
+- ex03: create functions to allocate, read and free datas like a dictionnary
+
+## Day05 RGB
+
+- ex00: change RGB LED D5 color to red, green and blue with 1s delay
+- ex01: add yellow, cyan, magenta and white
+- ex02: display color wheel with the `wheel` function given
+- ex03: read color on serial port and change the led color with it (format is: #RRGGBB)
